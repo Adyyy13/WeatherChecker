@@ -2,10 +2,13 @@ package com.example.weatherchecker.composables
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -73,24 +76,29 @@ fun WeatherApp(mainActivity: MainActivity) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Display Weather Records
-        for (record in weatherRecords) {
-            val dateString = SimpleDateFormat(
-                "dd MMM, hh:mm a",
-                Locale.getDefault()
-            ).format(Date(record.dateTime))
-            WeatherRecord(
-                location = record.location,
-                dateTime = dateString,
-                temperature = "${record.temperature}°C"
-            ) {
-                // This is the lambda function which will be executed on clicking a record
-                coroutineScope.launch {
-                    repository.deleteWeatherRecord(record)
-                    weatherRecords = weatherRecords.filter { it != record }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+            items(weatherRecords) { record ->
+                val dateString = SimpleDateFormat(
+                    "dd MMM, hh:mm a",
+                    Locale.getDefault()
+                ).format(Date(record.dateTime))
+
+                WeatherRecord(
+                    location = record.location,
+                    dateTime = dateString,
+                    temperature = "${record.temperature}°C"
+                ) {
+                    // This is the lambda function which will be executed on clicking a record
+                    coroutineScope.launch {
+                        repository.deleteWeatherRecord(record)
+                        weatherRecords = weatherRecords.filter { it != record }
+                    }
                 }
+                Spacer(modifier = Modifier.height(16.dp))
             }
-            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
